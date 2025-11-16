@@ -2,6 +2,8 @@
 
 A decentralized on-chain skills and achievement passport designed to showcase provable proof‑of‑work in the Web3 ecosystem.
 
+- Live: https://on-chain-cv-gamma.vercel.app/
+
 ## Overview
 
 OnchainCV issues non‑transferable credentials (SBTs) to wallet addresses. Each credential points to JSON metadata on IPFS (title, description, links). An owner‑managed registry controls who can issue credentials.
@@ -132,6 +134,8 @@ Next.js + wagmi/viem. Pages:
 ---
 
 ## Deployment
+
+- Production URL: https://on-chain-cv-gamma.vercel.app/
 
 - Environment variables (frontend/.env.production or platform env):
   - NEXT_PUBLIC_REGISTRY_ADDRESS=0xYourIssuerRegistry
