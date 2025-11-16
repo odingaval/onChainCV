@@ -72,8 +72,8 @@ Next.js + wagmi/viem. Pages:
 ## 5) Run the frontend
 
 - cd frontend
-- PORT=3002 pnpm dev
-- Open http://localhost:3002 and connect wallet (Moonbase Alpha / chainId 1287)
+- pnpm dev
+- Open http://localhost:3000 and connect wallet (Moonbase Alpha / chainId 1287)
 
 ---
 
@@ -97,7 +97,7 @@ Next.js + wagmi/viem. Pages:
 # Troubleshooting
 
 - Wallet connected but reads show “not owner/issuer”
-  - Ensure NEXT_PUBLIC_CHAIN_ID=1287 and NEXT_PUBLIC_RPC_URL=https://rpc.api.moonbase.moonbeam.network
+  - Ensure NEXT_PUBLIC_CHAIN_ID=1287 and NEXT_PUBLIC_RPC_URL uses an HTTPS endpoint (e.g. https://rpc.api.moonbase.moonbeam.network)
   - Restart dev server after env edits; click Refresh on /admin.
 - IPFS upload fails
   - Confirm NEXT_PUBLIC_IPFS_API is http://127.0.0.1:5001/api/v0
@@ -105,8 +105,54 @@ Next.js + wagmi/viem. Pages:
 - Gateway fetch fails
   - Try a public gateway temporarily:
     - NEXT_PUBLIC_IPFS_GATEWAY=https://ipfs.io/ipfs/
+- My page shows “No credentials found”
+  - Not an error. Increase the search window by clicking “Load older history (+5k)” on /my, or call `/api/credentials?address=0x...&window=10000`.
+- RPC “block range too wide”
+  - The server API chunks requests under provider limits. If you still see it, reduce the window or switch to a faster RPC endpoint.
+- Using wss:// RPC URLs
+  - Use HTTPS RPCs for server API (e.g., https://rpc.api.moonbase.moonbeam.network). WebSocket URLs won’t work with the current HTTP transport.
+- BigInt serialization errors
+  - The API returns stringified `tokenId` and block numbers. If you built your own client, parse them as strings.
 - Token URI
   - cast call <SBT> "tokenURI(uint256)(string)" <id> --rpc-url https://rpc.api.moonbase.moonbeam.network
+
+---
+
+## Server API (production-friendly)
+
+- Endpoint: `GET /api/credentials?address=0x...&window=3000`
+  - address: checksummed EVM address (required)
+  - window: optional block window to search backward from latest (default 3000, capped server-side)
+- Behavior
+  - Uses topic filtering by subject and chunked `getLogs` to stay under provider limits
+  - Returns 204 No Content if no credentials found in the window
+  - JSON fields: `tokenId` (string), `issuer` (string), `subject` (string), `cid` (string), `uri` (string), `gatewayUrl` (string), `issuedAtBlock` (string), `revoked` (boolean), `revokedAtBlock` (string | undefined)
+- Tip: Hit the endpoint directly in a browser to debug.
+
+---
+
+## Deployment
+
+- Environment variables (frontend/.env.production or platform env):
+  - NEXT_PUBLIC_REGISTRY_ADDRESS=0xYourIssuerRegistry
+  - NEXT_PUBLIC_SBT_ADDRESS=0xYourCredentialSBT
+  - NEXT_PUBLIC_CHAIN_ID=1287
+  - NEXT_PUBLIC_RPC_URL=https://rpc.api.moonbase.moonbeam.network (HTTPS)
+  - NEXT_PUBLIC_IPFS_API=http://127.0.0.1:5001/api/v0 (or your hosted IPFS API)
+  - NEXT_PUBLIC_IPFS_GATEWAY=https://ipfs.io/ipfs/ (or your gateway)
+- Build & start locally (prod):
+  - cd frontend
+  - pnpm build
+  - pnpm start  # defaults to port 3000
+- Vercel
+  - Import the frontend project, set the envs above in Project Settings → Environment Variables
+  - Framework: Next.js; Build command: `next build`; Output: Next.js default
+  - Recommended: set a fast region near Moonbase RPC and your users
+- Self-host / Docker (optional)
+  - Create a Dockerfile that runs `next build` then `next start`
+  - Ensure envs are passed at runtime; expose port 3000
+- Next.js config (optional)
+  - You can add `turbopack: { root: __dirname }` in `next.config.js` to silence workspace root warnings in dev
 
 ---
 
