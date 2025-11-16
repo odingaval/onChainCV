@@ -61,8 +61,8 @@ export default function AdminPage() {
         waitForTransactionReceipt(config, { hash }),
         new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout waiting for confirmation")), 45000)),
       ]).catch((e) => e as any);
-      if (receipt && receipt.transactionHash) {
-        setStatus(`Issuer added in tx ${receipt.transactionHash}`);
+      if (receipt && typeof (receipt as any).transactionHash === "string") {
+        setStatus(`Issuer added in tx ${(receipt as any).transactionHash}`);
       } else {
         try {
           const ok = await readContract(config, {
@@ -100,8 +100,8 @@ export default function AdminPage() {
         waitForTransactionReceipt(config, { hash }),
         new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout waiting for confirmation")), 45000)),
       ]).catch((e) => e as any);
-      if (receipt && receipt.transactionHash) {
-        setStatus(`Issuer removed in tx ${receipt.transactionHash}`);
+      if (receipt && typeof (receipt as any).transactionHash === "string") {
+        setStatus(`Issuer removed in tx ${(receipt as any).transactionHash}`);
       } else {
         try {
           const ok = await readContract(config, {

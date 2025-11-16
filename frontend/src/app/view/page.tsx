@@ -4,10 +4,12 @@ import { useConfig, useAccount } from "wagmi";
 import { readContract, writeContract, waitForTransactionReceipt } from "wagmi/actions";
 import { addresses, credentialSbtAbi, isValidAddress } from "../../contracts";
 import { toGatewayUrl } from "../../lib/ipfs";
+import { useToast } from "../providers";
 
 export default function ViewCredentialPage() {
   const config = useConfig();
   const { address } = useAccount();
+  const { addToast } = useToast();
 
   const [tokenId, setTokenId] = useState<string>("1");
   const [status, setStatus] = useState<string>("");
@@ -47,18 +49,24 @@ export default function ViewCredentialPage() {
           const json = await res.json();
           setMetadata(json);
           setStatus("");
+          addToast({ type: "success", message: "Credential loaded" });
         } else {
           setStatus(`Fetched credential. Metadata fetch failed: ${res.status}`);
+          addToast({ type: "error", message: `Metadata fetch failed: ${res.status}` });
         }
       } catch (e) {
         setStatus("Fetched credential. Metadata fetch failed.");
+        addToast({ type: "error", message: "Metadata fetch failed" });
       }
     } catch (e: any) {
-      setStatus(e?.shortMessage || e?.message || "Fetch failed");
+      const msg = e?.shortMessage || e?.message || "Fetch failed";
+      setStatus(msg);
+      addToast({ type: "error", message: msg });
     }
   }
 
   async function revoke() {
+    const explorer = (h: string) => `https://moonbase.moonscan.io/tx/${h}`;
     try {
       setStatus("Revoking credential...");
       if (!isValidAddress(addresses.sbt)) throw new Error("SBT address not set");
@@ -69,11 +77,15 @@ export default function ViewCredentialPage() {
         functionName: "revoke",
         args: [token],
       });
+      addToast({ type: "info", message: "Revoke submitted", link: { href: explorer(hash), label: "View tx" } });
       await waitForTransactionReceipt(config, { hash });
       setStatus("Revoked. Refreshing...");
+      addToast({ type: "success", message: "Credential revoked", link: { href: explorer(hash), label: "View tx" } });
       await fetchCredential();
     } catch (e: any) {
-      setStatus(e?.shortMessage || e?.message || "Revoke failed");
+      const msg = e?.shortMessage || e?.message || "Revoke failed";
+      setStatus(msg);
+      addToast({ type: "error", message: msg });
     }
   }
 
