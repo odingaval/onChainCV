@@ -6,7 +6,7 @@ A decentralized on-chain skills and achievement passport designed to showcase pr
 
 ## Overview
 
-OnchainCV issues non‑transferable credentials (SBTs) to wallet addresses. Each credential points to JSON metadata on IPFS (title, description, links). An owner‑managed registry controls who can issue credentials.
+OnchainCV issues non‑transferable credentials (SBTs) to wallet addresses. Each credential points to JSON metadata on IPFS (title, description, links). An owner‑managed registry controls who can issue credentials. The platform also includes a comprehensive profile management system for users to create and share their professional identities.
 
 ## Contracts
 
@@ -15,11 +15,12 @@ OnchainCV issues non‑transferable credentials (SBTs) to wallet addresses. Each
 
 ## Frontend
 
-Next.js + wagmi/viem. Pages:
+Next.js + wagmi/viem with modern dark theme UI. Pages:
 - `/admin`: Owner adds/removes issuers.
 - `/issue`: Issuers upload metadata to IPFS and mint credentials.
 - `/view`: View credential by tokenId (issuers can revoke).
-- `/my`: List credentials for the connected address from events.
+- `/my`: User profile management with edit/view modes, credential listing, and profile sharing.
+- `/view/{address}`: Public profile viewing with customizable privacy settings.
 
 ---
 
@@ -92,7 +93,7 @@ Next.js + wagmi/viem. Pages:
   - /view → enter tokenId. View details and metadata.
   - If issuer, you can revoke.
 - My (recipient)
-  - /my → connected address sees its credentials via event logs.
+  - /my → connected address sees its credentials via event logs, manage profile with edit/view modes, and share public profile URL.
 
 ---
 
@@ -122,6 +123,7 @@ Next.js + wagmi/viem. Pages:
 
 ## Server API (production-friendly)
 
+### Credentials API
 - Endpoint: `GET /api/credentials?address=0x...&window=3000`
   - address: checksummed EVM address (required)
   - window: optional block window to search backward from latest (default 3000, capped server-side)
@@ -130,6 +132,17 @@ Next.js + wagmi/viem. Pages:
   - Returns 204 No Content if no credentials found in the window
   - JSON fields: `tokenId` (string), `issuer` (string), `subject` (string), `cid` (string), `uri` (string), `gatewayUrl` (string), `issuedAtBlock` (string), `revoked` (boolean), `revokedAtBlock` (string | undefined)
 - Tip: Hit the endpoint directly in a browser to debug.
+
+### Profile API
+- Endpoint: `GET /api/profile?address=0x...`
+  - address: checksummed EVM address (required)
+  - Returns user profile data including personal info, skills, experience, and privacy settings
+- Endpoint: `POST /api/profile`
+  - Creates or updates user profile with validation
+  - Supports profile image uploads and metadata management
+- Endpoint: `GET /api/search?q=...`
+  - Search profiles by name, skills, or other criteria
+  - Returns paginated results with profile previews
 
 ---
 

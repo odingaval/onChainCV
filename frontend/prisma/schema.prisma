@@ -1,0 +1,66 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserProfile {
+  id            String    @id @default(cuid())
+  walletAddress String    @unique
+  username      String?   @unique
+  displayName   String?
+  name          String?   // For search functionality
+  title         String?   // Job title
+  bio           String?
+  avatarUrl     String?
+  isPublic      Boolean   @default(false)
+  customSlug    String?   @unique
+  category      String?   // developer, designer, manager, other
+  experience    String?   // junior, mid, senior, lead
+  skills        Json?     // Array of skills stored as JSON
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  credentials   Credential[]
+  shareSettings ShareSettings?
+  
+  @@index([walletAddress])
+  @@index([username])
+  @@index([customSlug])
+  @@index([isPublic])
+  @@index([category])
+  @@index([experience])
+}
+
+model Credential {
+  id              String   @id @default(cuid())
+  tokenId         String
+  issuer          String
+  subject         String
+  cid             String
+  uri             String
+  gatewayUrl      String
+  issuedAtBlock   String
+  revoked         Boolean  @default(false)
+  revokedAtBlock  String?
+  userProfileId   String
+  userProfile     UserProfile @relation(fields: [userProfileId], references: [id])
+  
+  @@index([tokenId])
+  @@index([subject])
+  @@index([userProfileId])
+}
+
+model ShareSettings {
+  id                String   @id @default(cuid())
+  userProfileId     String   @unique
+  userProfile       UserProfile @relation(fields: [userProfileId], references: [id])
+  showCredentials   Boolean  @default(true)
+  showActivity      Boolean  @default(true)
+  showWalletAddress Boolean  @default(false)
+  allowSearch       Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

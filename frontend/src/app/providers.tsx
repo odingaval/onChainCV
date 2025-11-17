@@ -36,7 +36,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           {children}
           <div className="fixed right-3 top-3 z-50 flex w-[360px] max-w-[90vw] flex-col gap-2">
             {toasts.map((t) => (
-              <div key={t.id} className={`rounded border p-3 text-sm shadow bg-white ${t.type === "success" ? "border-green-300" : t.type === "error" ? "border-red-300" : "border-zinc-200"}`}>
+              <div key={t.id} className={`rounded border p-3 text-sm shadow bg-gray-900 text-white ${t.type === "success" ? "border-green-500" : t.type === "error" ? "border-red-500" : "border-gray-600"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="whitespace-pre-wrap break-words">{t.message}</div>
                   {t.link && (
