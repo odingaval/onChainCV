@@ -184,4 +184,4 @@ Next.js + wagmi/viem with modern dark theme UI. Pages:
 
 # License
 
-MIT
+MIT.
