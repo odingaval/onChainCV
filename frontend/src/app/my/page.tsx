@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useToast } from "../providers";
-import ProfileManager from "../../components/ProfileManager";
+import ProfileManager from "@/components/ProfileManager";
 
 type ApiCredential = {
   tokenId: string;
