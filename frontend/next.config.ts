@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   // Add empty turbopack config to satisfy Next.js
   turbopack: {},
+  trailingSlash: true,
   // Webpack configuration
   webpack: (config, { isServer }) => {
     // Add path aliases
