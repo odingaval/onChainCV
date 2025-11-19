@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
 
     // Process credentials
     const credentials: any[] = []
-    const revokedTokenIds = new Set()
+    const revokedTokenIds = new Set<string>()
 
     // Process revoked logs first
     for (const log of revokedLogs) {
@@ -183,7 +183,12 @@ export async function POST(req: NextRequest) {
     // Upsert credentials in database
     const upsertPromises = credentials.map(cred => 
       prisma.credential.upsert({
-        where: { tokenId: cred.tokenId },
+        where: {
+          tokenId_userProfileId: {
+            tokenId: cred.tokenId,
+            userProfileId: profile.id
+          }
+        },
         update: {
           revoked: cred.revoked,
           revokedAtBlock: null
@@ -193,19 +198,18 @@ export async function POST(req: NextRequest) {
           userProfileId: profile.id
         }
       })
-    )
+    );
 
     // Mark revoked credentials
-    for (const tokenId of revokedTokenIds) {
-      upsertPromises.push(
-        prisma.credential.updateMany({
-          where: { tokenId },
-          data: { revoked: true, revokedAtBlock: latest.toString() }
-        })
-      )
-    }
+    const updatePromises = Array.from(revokedTokenIds).map(tokenId =>
+      prisma.credential.updateMany({
+        where: { tokenId },
+        data: { revoked: true, revokedAtBlock: latest.toString() }
+      })
+    );
 
     await Promise.all(upsertPromises)
+    await Promise.all(updatePromises)
 
     return NextResponse.json({
       success: true,

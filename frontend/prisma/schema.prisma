@@ -48,6 +48,7 @@ model Credential {
   userProfileId   String
   userProfile     UserProfile @relation(fields: [userProfileId], references: [id])
   
+  @@unique([tokenId, userProfileId])
   @@index([tokenId])
   @@index([subject])
   @@index([userProfileId])
