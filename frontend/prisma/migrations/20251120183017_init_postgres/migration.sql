@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "UserProfile" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "walletAddress" TEXT NOT NULL,
     "username" TEXT,
     "displayName" TEXT,
@@ -13,13 +13,15 @@ CREATE TABLE "UserProfile" (
     "category" TEXT,
     "experience" TEXT,
     "skills" JSONB,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserProfile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Credential" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "tokenId" TEXT NOT NULL,
     "issuer" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
@@ -30,20 +32,22 @@ CREATE TABLE "Credential" (
     "revoked" BOOLEAN NOT NULL DEFAULT false,
     "revokedAtBlock" TEXT,
     "userProfileId" TEXT NOT NULL,
-    CONSTRAINT "Credential_userProfileId_fkey" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+
+    CONSTRAINT "Credential_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ShareSettings" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "userProfileId" TEXT NOT NULL,
     "showCredentials" BOOLEAN NOT NULL DEFAULT true,
     "showActivity" BOOLEAN NOT NULL DEFAULT true,
     "showWalletAddress" BOOLEAN NOT NULL DEFAULT false,
     "allowSearch" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "ShareSettings_userProfileId_fkey" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ShareSettings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -81,6 +85,9 @@ CREATE INDEX "Credential_subject_idx" ON "Credential"("subject");
 
 -- CreateIndex
 CREATE INDEX "Credential_userProfileId_idx" ON "Credential"("userProfileId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Credential_tokenId_userProfileId_key" ON "Credential"("tokenId", "userProfileId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ShareSettings_userProfileId_key" ON "ShareSettings"("userProfileId");

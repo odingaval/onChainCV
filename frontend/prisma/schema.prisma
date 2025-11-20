@@ -1,28 +1,34 @@
+// Update the datasource to use PostgreSQL
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Enable connection pooling for better performance
+  // This is especially important for serverless environments
+  relationMode = "prisma" // or "foreignKeys" if you prefer
 }
 
 generator client {
   provider = "prisma-client-js"
+  // Add preview features if needed
+  // previewFeatures = ["postgresqlExtensions"]
 }
 
 model UserProfile {
-  id            String    @id @default(cuid())
-  walletAddress String    @unique
-  username      String?   @unique
+  id            String        @id @default(cuid())
+  walletAddress String        @unique
+  username      String?       @unique
   displayName   String?
-  name          String?   // For search functionality
-  title         String?   // Job title
+  name          String?       // For search functionality
+  title         String?       // Job title
   bio           String?
   avatarUrl     String?
-  isPublic      Boolean   @default(false)
-  customSlug    String?   @unique
-  category      String?   // developer, designer, manager, other
-  experience    String?   // junior, mid, senior, lead
-  skills        Json?     // Array of skills stored as JSON
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isPublic      Boolean       @default(false)
+  customSlug    String?       @unique
+  category      String?       // developer, designer, manager, other
+  experience    String?       // junior, mid, senior, lead
+  skills        Json?         // Array of skills stored as JSON
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   credentials   Credential[]
   shareSettings ShareSettings?
   
@@ -35,7 +41,7 @@ model UserProfile {
 }
 
 model Credential {
-  id              String   @id @default(cuid())
+  id              String      @id @default(cuid())
   tokenId         String
   issuer          String
   subject         String
@@ -43,10 +49,10 @@ model Credential {
   uri             String
   gatewayUrl      String
   issuedAtBlock   String
-  revoked         Boolean  @default(false)
+  revoked         Boolean     @default(false)
   revokedAtBlock  String?
   userProfileId   String
-  userProfile     UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
   
   @@unique([tokenId, userProfileId])
   @@index([tokenId])
@@ -55,13 +61,13 @@ model Credential {
 }
 
 model ShareSettings {
-  id                String   @id @default(cuid())
-  userProfileId     String   @unique
-  userProfile       UserProfile @relation(fields: [userProfileId], references: [id])
-  showCredentials   Boolean  @default(true)
-  showActivity      Boolean  @default(true)
-  showWalletAddress Boolean  @default(false)
-  allowSearch       Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                String      @id @default(cuid())
+  userProfileId     String      @unique
+  userProfile       UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  showCredentials   Boolean     @default(true)
+  showActivity      Boolean     @default(true)
+  showWalletAddress Boolean     @default(false)
+  allowSearch       Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }
