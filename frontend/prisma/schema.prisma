@@ -1,73 +1,58 @@
-// Update the datasource to use PostgreSQL
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // Enable connection pooling for better performance
-  // This is especially important for serverless environments
-  relationMode = "prisma" // or "foreignKeys" if you prefer
-}
-
-generator client {
-  provider = "prisma-client-js"
-  // Add preview features if needed
-  // previewFeatures = ["postgresqlExtensions"]
+  directUrl = env("DIRECT_URL")
 }
 
 model UserProfile {
-  id            String        @id @default(cuid())
-  walletAddress String        @unique
-  username      String?       @unique
-  displayName   String?
-  name          String?       // For search functionality
-  title         String?       // Job title
-  bio           String?
-  avatarUrl     String?
-  isPublic      Boolean       @default(false)
-  customSlug    String?       @unique
-  category      String?       // developer, designer, manager, other
-  experience    String?       // junior, mid, senior, lead
-  skills        Json?         // Array of skills stored as JSON
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  credentials   Credential[]
-  shareSettings ShareSettings?
-  
-  @@index([walletAddress])
-  @@index([username])
-  @@index([customSlug])
-  @@index([isPublic])
-  @@index([category])
-  @@index([experience])
-}
-
-model Credential {
-  id              String      @id @default(cuid())
-  tokenId         String
-  issuer          String
-  subject         String
-  cid             String
-  uri             String
-  gatewayUrl      String
-  issuedAtBlock   String
-  revoked         Boolean     @default(false)
-  revokedAtBlock  String?
-  userProfileId   String
-  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  
-  @@unique([tokenId, userProfileId])
-  @@index([tokenId])
-  @@index([subject])
-  @@index([userProfileId])
+  id              String         @id @default(cuid())
+  walletAddress   String         @unique
+  username        String?        @unique
+  displayName     String?
+  bio             String?
+  avatarUrl       String?
+  isPublic        Boolean        @default(true)
+  customSlug      String?        @unique
+  title           String?
+  category        String?
+  experience      String?
+  skills          String[]       @default([])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  shareSettings   ShareSettings?
+  credentials     Credential[]
 }
 
 model ShareSettings {
-  id                String      @id @default(cuid())
-  userProfileId     String      @unique
-  userProfile       UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  showCredentials   Boolean     @default(true)
-  showActivity      Boolean     @default(true)
-  showWalletAddress Boolean     @default(false)
-  allowSearch       Boolean     @default(true)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  userProfileId    String      @unique
+  userProfile      UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  showCredentials  Boolean     @default(true)
+  showActivity     Boolean     @default(true)
+  showWalletAddress Boolean    @default(true)
+  allowSearch      Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model Credential {
+  id               String      @id @default(cuid())
+  tokenId          String
+  issuer           String
+  subject          String
+  schemaId         String
+  data             Json
+  issuedAtBlock    Int
+  revoked          Boolean     @default(false)
+  revokedAtBlock   Int?
+  userProfileId    String
+  userProfile      UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@unique([tokenId, issuer])
 }

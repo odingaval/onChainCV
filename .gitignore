@@ -1,3 +1,13 @@
 contracts/.env
 frontend/.env.local
 .DS_Store
+node_modules/
+.next/
+.karma/
+.vscode/
+*.log
+.env
+.env.local
+*.tar.gz
+kubo/
+metadata.json
